@@ -11,6 +11,7 @@
 library(psych) #describeby
 library(WeightIt) #trim excessive weights
 #library(Hmisc) #weighted variance
+library(gmodels) #CrossTable
 
 
 ### READ DATA  ###
@@ -37,8 +38,8 @@ plwh$Clinic_A = T
 #census populations for denominators (based on Delaware catchment)
 #https://data.census.gov/table?q=Delaware&tid=ACSDP1Y2021.DP05 (2021 ACS 1-yr)
 n_pop = 1003384
-n_white = 690900
-n_black = 243431
+n_white = 595212
+n_black = 205217
 n_hispanic = 101213
 n_male = 485908
 n_female = 517476
@@ -85,6 +86,15 @@ clinic_a_biased = NA
 clinic_a_bayes_n1 = NA
 clinic_a_bayes_n2 = NA
 clinic_a_bayes_n3 = NA
+clinic_a_bayes_m1n1 = NA
+clinic_a_bayes_m1n2 = NA
+clinic_a_bayes_m1n3 = NA
+clinic_a_bayes_m2n1 = NA
+clinic_a_bayes_m2n2 = NA
+clinic_a_bayes_m2n3 = NA
+clinic_a_bayes_m3n1 = NA
+clinic_a_bayes_m3n2 = NA
+clinic_a_bayes_m3n3 = NA
 
 i=1
 for (j in 1:1000) {
@@ -173,6 +183,17 @@ for (j in 1:1000) {
   clinic_a_bayes_n2 = c(clinic_a_bayes_n2, 10^(((n2*m0) + (clinic_n*clinic_xbar))/(n2 + clinic_n)))
   clinic_a_bayes_n3 = c(clinic_a_bayes_n3, 10^(((n3*m0) + (clinic_n*clinic_xbar))/(n3 + clinic_n)))
   
+  #sensitivity analysis on m0
+  clinic_a_bayes_m1n1 = c(clinic_a_bayes_m1n1, 10^(((n1*m0*0.25) + (clinic_n*clinic_xbar))/(n1 + clinic_n)))
+  clinic_a_bayes_m1n2 = c(clinic_a_bayes_m1n2, 10^(((n2*m0*0.25) + (clinic_n*clinic_xbar))/(n2 + clinic_n)))
+  clinic_a_bayes_m1n3 = c(clinic_a_bayes_m1n3, 10^(((n3*m0*0.25) + (clinic_n*clinic_xbar))/(n3 + clinic_n)))
+  clinic_a_bayes_m2n1 = c(clinic_a_bayes_m2n1, 10^(((n1*m0*0.5) + (clinic_n*clinic_xbar))/(n1 + clinic_n)))
+  clinic_a_bayes_m2n2 = c(clinic_a_bayes_m2n2, 10^(((n2*m0*0.5) + (clinic_n*clinic_xbar))/(n2 + clinic_n)))
+  clinic_a_bayes_m2n3 = c(clinic_a_bayes_m2n3, 10^(((n3*m0*0.5) + (clinic_n*clinic_xbar))/(n3 + clinic_n)))
+  clinic_a_bayes_m3n1 = c(clinic_a_bayes_m3n1, 10^(((n1*m0*2) + (clinic_n*clinic_xbar))/(n1 + clinic_n)))
+  clinic_a_bayes_m3n2 = c(clinic_a_bayes_m3n2, 10^(((n2*m0*2) + (clinic_n*clinic_xbar))/(n2 + clinic_n)))
+  clinic_a_bayes_m3n3 = c(clinic_a_bayes_m3n3, 10^(((n3*m0*2) + (clinic_n*clinic_xbar))/(n3 + clinic_n)))
+  
   rm(m0,n1,n2,n3,clinic_xbar,clinic_n,wt_trim,sample_probs_observed,biased_probs,sample_probs_biased,bias_factor)
 }
 rm(j)
@@ -181,7 +202,18 @@ rm(i)
 
 ### VISUALIZE RESULTS ###
 
-#naive to weighted
+#naive to weighted, linear scale
+boxplot((clinic_a), at=2, xlim = c(0.7, 6.3), ylim = range(0, 1000), xaxt = "n", ylab="Mean Viral Load (copies/mL)")
+boxplot((clinic_a_biased), at=3, xaxt="n", add=T)
+boxplot((clinic_a_bayes_n1), at=4, xaxt="n", add=T)
+boxplot((clinic_a_bayes_n2), at=5, xaxt="n", add=T)
+boxplot((clinic_a_bayes_n3), at=6, xaxt="n", add=T)
+points(1,(exp(mean(log(plwh$VL)))), pch=18, cex=2)
+lines(x=c(0,20), y=rep((exp(mean(log(plwh$VL)))),2), lty=2)
+#lines(x=c(0,20), y=rep((10^((23348) - 0.5*(1.2^2))),2), lty=3)
+axis(1, at=1:6, labels=c("Observed","Weighted","Biased",expression(Bayesian^1),expression(Bayesian^2),expression(Bayesian^3)), tick=T, las=3, cex.axis=1)
+
+#naive to weighted, log10 scale
 boxplot(log10(clinic_a), at=2, xlim = c(0.7, 6.3), ylim = range(1.5, 3.0), xaxt = "n", ylab="Mean Viral Load (log10 copies/mL)")
 boxplot(log10(clinic_a_biased), at=3, xaxt="n", add=T)
 boxplot(log10(clinic_a_bayes_n1), at=4, xaxt="n", add=T)
@@ -192,17 +224,46 @@ lines(x=c(0,20), y=rep(log10(exp(mean(log(plwh$VL)))),2), lty=2)
 #lines(x=c(0,20), y=rep(log10(10^(log10(23348) - 0.5*(1.2^2))),2), lty=3)
 axis(1, at=1:6, labels=c("Observed","Weighted","Biased",expression(Bayesian^1),expression(Bayesian^2),expression(Bayesian^3)), tick=T, las=3, cex.axis=1)
 
+#sensitivity analysis, log scale
+boxplot(log10(clinic_a_bayes_n1), at=1, xlim = c(0.7, 12.3), ylim = range(1, 5.5), xaxt = "n", ylab="Mean Viral Load (log10 copies/mL)")
+boxplot(log10(clinic_a_bayes_m1n1), at=2, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_m2n1), at=3, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_m3n1), at=4, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_n2), at=5, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_m1n2), at=6, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_m2n2), at=7, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_m3n2), at=8, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_n3), at=9, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_m1n3), at=10, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_m2n3), at=11, xaxt="n", add=T)
+boxplot(log10(clinic_a_bayes_m3n3), at=12, xaxt="n", add=T)
+polygon(x=c(0.5,0.5,4.5,4.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
+polygon(x=c(8.5,8.5,12.5,12.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
+axis(1, at=1:12, labels=rep(c("m0","m0*0.25","m0*0.5","m0*2.0"),3), tick=T, las=3, cex.axis=1)
+axis(3, at=c(2,6,10), labels=c("Sample size 25%","Sample size 50%","Sample size 200%"), tick=F, cex.axis=0.8)
+
 
 ### PAPER DESCRIPTIVES ###
 
 nrow(plwh)
 log10(exp(mean(log(plwh$VL)))) #geometric mean
-log10(sd(plwh$VL))
-sum(plwh$VL<=20)
-sum(plwh$VL<=20)/nrow(plwh)
+(exp(mean(log(plwh$VL)))) #geometric mean
+(sd(plwh$VL))
+sum(plwh$VL<=200)
+sum(plwh$VL<=200)/nrow(plwh)
 
+median(log10(clinic_a), na.rm=T)
+median((clinic_a), na.rm=T)
 median(log10(clinic_a_biased), na.rm=T)
+median((clinic_a_biased), na.rm=T)
 median(log10(clinic_a_bayes_n1), na.rm=T)
+median((clinic_a_bayes_n1), na.rm=T)
 median(log10(clinic_a_bayes_n2), na.rm=T)
+median((clinic_a_bayes_n2), na.rm=T)
 median(log10(clinic_a_bayes_n3), na.rm=T)
+median((clinic_a_bayes_n3), na.rm=T)
 
+#table
+CrossTable(plwh$Age)
+CrossTable(plwh$Gender)
+CrossTable(plwh$Race)

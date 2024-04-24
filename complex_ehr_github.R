@@ -11,6 +11,7 @@
 library(psych) #describeby
 library(WeightIt) #trim excessive weights
 #library(Hmisc) #weighted variance
+library(gmodels) #CrossTable
 
 
 ### CREATE DATA and SIMULATE ###
@@ -20,6 +21,7 @@ set.seed(777)
 #sim_results = data.frame("Simulation"=1:1000,"VL_population"=NA,"VL_population_nodx"=NA,"VL_population_dx"=NA,"VL_population_notincare"=NA,"VL_population_incare"=NA,"VL_clinic_A"=NA,"VL_clinic_B"=NA,"VL_clinic_C"=NA,"VL_clinic_D"=NA,"VL_clinic_E"=NA,"VL_clinic_F"=NA,"VL_clinic_G"=NA,"VL_clinic_A_weighted"=NA,"VL_clinic_B_weighted"=NA,"VL_clinic_C_weighted"=NA,"VL_clinic_D_weighted"=NA,"VL_clinic_E_weighted"=NA,"VL_clinic_F_weighted"=NA,"VL_clinic_G_weighted"=NA,"VL_clinic_A_rmse"=NA,"VL_clinic_B_rmse"=NA,"VL_clinic_C_rmse"=NA,"VL_clinic_D_rmse"=NA,"VL_clinic_E_rmse"=NA,"VL_clinic_F_rmse"=NA,"VL_clinic_G_rmse"=NA,"VL_clinic_A_weighted_under"=NA,"VL_clinic_B_weighted_under"=NA,"VL_clinic_C_weighted_under"=NA,"VL_clinic_D_weighted_under"=NA,"VL_clinic_E_weighted_under"=NA,"VL_clinic_F_weighted_under"=NA,"VL_clinic_G_weighted_under"=NA,"VL_clinic_A_rmse_under"=NA,"VL_clinic_B_rmse_under"=NA,"VL_clinic_C_rmse_under"=NA,"VL_clinic_D_rmse_under"=NA,"VL_clinic_E_rmse_under"=NA,"VL_clinic_F_rmse_under"=NA,"VL_clinic_G_rmse_under"=NA,"VL_clinic_A_weighted_over"=NA,"VL_clinic_B_weighted_over"=NA,"VL_clinic_C_weighted_over"=NA,"VL_clinic_D_weighted_over"=NA,"VL_clinic_E_weighted_over"=NA,"VL_clinic_F_weighted_over"=NA,"VL_clinic_G_weighted_over"=NA,"VL_clinic_A_rmse_over"=NA,"VL_clinic_B_rmse_over"=NA,"VL_clinic_C_rmse_over"=NA,"VL_clinic_D_rmse_over"=NA,"VL_clinic_E_rmse_over"=NA,"VL_clinic_F_rmse_over"=NA,"VL_clinic_G_rmse_over"=NA,"VL_clinic_A_weighted_mixed"=NA,"VL_clinic_B_weighted_mixed"=NA,"VL_clinic_C_weighted_mixed"=NA,"VL_clinic_D_weighted_mixed"=NA,"VL_clinic_E_weighted_mixed"=NA,"VL_clinic_F_weighted_mixed"=NA,"VL_clinic_G_weighted_mixed"=NA,"VL_clinic_A_rmse_mixed"=NA,"VL_clinic_B_rmse_mixed"=NA,"VL_clinic_C_rmse_mixed"=NA,"VL_clinic_D_rmse_mixed"=NA,"VL_clinic_E_rmse_mixed"=NA,"VL_clinic_F_rmse_mixed"=NA,"VL_clinic_G_rmse_mixed"=NA,"VL_clinic_A_weighted_bayes"=NA,"VL_clinic_B_weighted_bayes"=NA,"VL_clinic_C_weighted_bayes"=NA,"VL_clinic_D_weighted_bayes"=NA,"VL_clinic_E_weighted_bayes"=NA,"VL_clinic_F_weighted_bayes"=NA,"VL_clinic_G_weighted_bayes"=NA,"VL_clinic_A_rmse_bayes"=NA,"VL_clinic_B_rmse_bayes"=NA,"VL_clinic_C_rmse_bayes"=NA,"VL_clinic_D_rmse_bayes"=NA,"VL_clinic_E_rmse_bayes"=NA,"VL_clinic_F_rmse_bayes"=NA,"VL_clinic_G_rmse_bayes"=NA,stringsAsFactors=F)
 #sim_results = data.frame("Simulation"=1:1000, "VL_population"=NA, "VL_population_nodx"=NA, "VL_population_dx"=NA, "VL_population_notincare"=NA, "VL_population_incare"=NA, "VL_clinic_A"=NA, "VL_clinic_B"=NA, "VL_clinic_C"=NA, "VL_clinic_A_weighted"=NA, "VL_clinic_B_weighted"=NA, "VL_clinic_C_weighted"=NA, "VL_clinic_A_rmse"=NA, "VL_clinic_B_rmse"=NA, "VL_clinic_C_rmse"=NA, "VL_clinic_A_weighted_biased"=NA, "VL_clinic_B_weighted_biased"=NA, "VL_clinic_C_weighted_biased"=NA, "VL_clinic_A_rmse_biased"=NA, "VL_clinic_B_rmse_biased"=NA, "VL_clinic_C_rmse_biased"=NA, "VL_clinic_A_weighted_over"=NA, "VL_clinic_B_weighted_over"=NA, "VL_clinic_C_weighted_over"=NA, "VL_clinic_A_rmse_over"=NA, "VL_clinic_B_rmse_over"=NA, "VL_clinic_C_rmse_over"=NA, "VL_clinic_A_weighted_mixed"=NA, "VL_clinic_B_weighted_mixed"=NA, "VL_clinic_C_weighted_mixed"=NA, "VL_clinic_A_rmse_mixed"=NA, "VL_clinic_B_rmse_mixed"=NA, "VL_clinic_C_rmse_mixed"=NA, "VL_clinic_A_weighted_bayes_n1"=NA, "VL_clinic_B_weighted_bayes_n1"=NA, "VL_clinic_C_weighted_bayes_n1"=NA, "VL_clinic_A_weighted_bayes_n2"=NA, "VL_clinic_B_weighted_bayes_n2"=NA, "VL_clinic_C_weighted_bayes_n2"=NA,"VL_clinic_A_weighted_bayes_n3"=NA, "VL_clinic_B_weighted_bayes_n3"=NA, "VL_clinic_C_weighted_bayes_n3"=NA, "VL_clinic_C_weighted_bayes_m1"=NA, "VL_clinic_A_rmse_bayes_n1"=NA, "VL_clinic_B_rmse_bayes_n1"=NA, "VL_clinic_C_rmse_bayes_n1"=NA, "VL_clinic_A_rmse_bayes_n2"=NA, "VL_clinic_B_rmse_bayes_n2"=NA, "VL_clinic_C_rmse_bayes_n2"=NA, "VL_clinic_A_rmse_bayes_n3"=NA, "VL_clinic_B_rmse_bayes_n3"=NA, "VL_clinic_C_rmse_bayes_n3"=NA, "VL_clinic_C_rmse_bayes_m1"=NA, stringsAsFactors=F)
 sim_results = data.frame("Simulation"=1:1000, "VL_population"=NA, "VL_population_nodx"=NA, "VL_population_dx"=NA, "VL_population_notincare"=NA, "VL_population_incare"=NA, "VL_clinic_A"=NA, "VL_clinic_B"=NA, "VL_clinic_C"=NA, "VL_clinic_A_weighted"=NA, "VL_clinic_B_weighted"=NA, "VL_clinic_C_weighted"=NA, "VL_clinic_A_rmse"=NA, "VL_clinic_B_rmse"=NA, "VL_clinic_C_rmse"=NA, "VL_clinic_A_weighted_biased"=NA, "VL_clinic_B_weighted_biased"=NA, "VL_clinic_C_weighted_biased"=NA, "VL_clinic_A_rmse_biased"=NA, "VL_clinic_B_rmse_biased"=NA, "VL_clinic_C_rmse_biased"=NA, "VL_clinic_A_weighted_bayes_n1"=NA, "VL_clinic_B_weighted_bayes_n1"=NA, "VL_clinic_C_weighted_bayes_n1"=NA, "VL_clinic_A_weighted_bayes_n2"=NA, "VL_clinic_B_weighted_bayes_n2"=NA, "VL_clinic_C_weighted_bayes_n2"=NA,"VL_clinic_A_weighted_bayes_n3"=NA, "VL_clinic_B_weighted_bayes_n3"=NA, "VL_clinic_C_weighted_bayes_n3"=NA, "VL_clinic_C_weighted_bayes_m1"=NA, "VL_clinic_A_rmse_bayes_n1"=NA, "VL_clinic_B_rmse_bayes_n1"=NA, "VL_clinic_C_rmse_bayes_n1"=NA, "VL_clinic_A_rmse_bayes_n2"=NA, "VL_clinic_B_rmse_bayes_n2"=NA, "VL_clinic_C_rmse_bayes_n2"=NA, "VL_clinic_A_rmse_bayes_n3"=NA, "VL_clinic_B_rmse_bayes_n3"=NA, "VL_clinic_C_rmse_bayes_n3"=NA, "VL_clinic_C_rmse_bayes_m1"=NA, stringsAsFactors=F)
+sim_pop = data.frame("Simulation"=1:1000, "Population_age0"=NA, "Population_age1"=NA, "Population_age2"=NA, "Population_age3"=NA, "Population_genderM"=NA, "Population_genderF"=NA, "Population_raceW"=NA, "Population_raceB"=NA, "Population_raceH"=NA, "Clinic_A_age0"=NA, "Clinic_A_age1"=NA, "Clinic_A_age2"=NA, "Clinic_A_age3"=NA, "Clinic_A_genderM"=NA, "Clinic_A_genderF"=NA, "Clinic_A_raceW"=NA, "Clinic_A_raceB"=NA, "Clinic_A_raceH"=NA, "Clinic_B_age0"=NA, "Clinic_B_age1"=NA, "Clinic_B_age2"=NA, "Clinic_B_age3"=NA, "Clinic_B_genderM"=NA, "Clinic_B_genderF"=NA, "Clinic_B_raceW"=NA, "Clinic_B_raceB"=NA, "Clinic_B_raceH"=NA, "Clinic_C_age0"=NA, "Clinic_C_age1"=NA, "Clinic_C_age2"=NA, "Clinic_C_age3"=NA, "Clinic_C_genderM"=NA, "Clinic_C_genderF"=NA, "Clinic_C_raceW"=NA, "Clinic_C_raceB"=NA, "Clinic_C_raceH"=NA, stringsAsFactors=F)
 
 for (i in 1:1000) {
   
@@ -440,6 +442,47 @@ for (i in 1:1000) {
   
   ### SUMMARY MEASURES ### 
   
+  #population characteristics
+  sim_pop$Population_age0[i] = sum(plwh$Age==0)
+  sim_pop$Population_age1[i] = sum(plwh$Age==1)
+  sim_pop$Population_age2[i] = sum(plwh$Age==2)
+  sim_pop$Population_age3[i] = sum(plwh$Age==3)
+  sim_pop$Population_genderM[i] = sum(plwh$Gender=="M")
+  sim_pop$Population_genderF[i] = sum(plwh$Gender=="F")
+  sim_pop$Population_raceW[i] = sum(plwh$Race=="W")
+  sim_pop$Population_raceB[i] = sum(plwh$Race=="B")
+  sim_pop$Population_raceH[i] = sum(plwh$Race=="H")
+  
+  sim_pop$Clinic_A_age0[i] = sum(plwh$Age[plwh$Clinic_A==T]==0)
+  sim_pop$Clinic_A_age1[i] = sum(plwh$Age[plwh$Clinic_A==T]==1)
+  sim_pop$Clinic_A_age2[i] = sum(plwh$Age[plwh$Clinic_A==T]==2)
+  sim_pop$Clinic_A_age3[i] = sum(plwh$Age[plwh$Clinic_A==T]==3)
+  sim_pop$Clinic_A_genderM[i] = sum(plwh$Gender[plwh$Clinic_A==T]=="M")
+  sim_pop$Clinic_A_genderF[i] = sum(plwh$Gender[plwh$Clinic_A==T]=="F")
+  sim_pop$Clinic_A_raceW[i] = sum(plwh$Race[plwh$Clinic_A==T]=="W")
+  sim_pop$Clinic_A_raceB[i] = sum(plwh$Race[plwh$Clinic_A==T]=="B")
+  sim_pop$Clinic_A_raceH[i] = sum(plwh$Race[plwh$Clinic_A==T]=="H")
+  
+  sim_pop$Clinic_B_age0[i] = sum(plwh$Age[plwh$Clinic_B==T]==0)
+  sim_pop$Clinic_B_age1[i] = sum(plwh$Age[plwh$Clinic_B==T]==1)
+  sim_pop$Clinic_B_age2[i] = sum(plwh$Age[plwh$Clinic_B==T]==2)
+  sim_pop$Clinic_B_age3[i] = sum(plwh$Age[plwh$Clinic_B==T]==3)
+  sim_pop$Clinic_B_genderM[i] = sum(plwh$Gender[plwh$Clinic_B==T]=="M")
+  sim_pop$Clinic_B_genderF[i] = sum(plwh$Gender[plwh$Clinic_B==T]=="F")
+  sim_pop$Clinic_B_raceW[i] = sum(plwh$Race[plwh$Clinic_B==T]=="W")
+  sim_pop$Clinic_B_raceB[i] = sum(plwh$Race[plwh$Clinic_B==T]=="B")
+  sim_pop$Clinic_B_raceH[i] = sum(plwh$Race[plwh$Clinic_B==T]=="H")
+  
+  sim_pop$Clinic_C_age0[i] = sum(plwh$Age[plwh$Clinic_C==T]==0)
+  sim_pop$Clinic_C_age1[i] = sum(plwh$Age[plwh$Clinic_C==T]==1)
+  sim_pop$Clinic_C_age2[i] = sum(plwh$Age[plwh$Clinic_C==T]==2)
+  sim_pop$Clinic_C_age3[i] = sum(plwh$Age[plwh$Clinic_C==T]==3)
+  sim_pop$Clinic_C_genderM[i] = sum(plwh$Gender[plwh$Clinic_C==T]=="M")
+  sim_pop$Clinic_C_genderF[i] = sum(plwh$Gender[plwh$Clinic_C==T]=="F")
+  sim_pop$Clinic_C_raceW[i] = sum(plwh$Race[plwh$Clinic_C==T]=="W")
+  sim_pop$Clinic_C_raceB[i] = sum(plwh$Race[plwh$Clinic_C==T]=="B")
+  sim_pop$Clinic_C_raceH[i] = sum(plwh$Race[plwh$Clinic_C==T]=="H")
+  
   #true VL using geometric mean for all VLs: exp(mean(log(X)))
   sim_results$VL_population[i] = exp(mean(log(plwh$VL)))
   
@@ -516,7 +559,31 @@ save.image("simulation.RData")
 #load
 load("simulation.RData")
 
-#naive to weighted
+#naive to weighted, linear scale
+boxplot((sim_results$VL_clinic_A), at=2, xlim=c(0.7, 17.3), ylim=range(0, 20000), xaxt = "n", ylab="Mean Viral Load (copies/mL)")
+boxplot((sim_results$VL_clinic_B), at=7, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C), at=12, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_A_weighted), at=3, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_B_weighted), at=8, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_weighted), at=13, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_A_weighted_bayes_n1), at=4, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_B_weighted_bayes_n1), at=9, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_weighted_bayes_n1), at=14, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_A_weighted_bayes_n2), at=5, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_B_weighted_bayes_n2), at=10, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_weighted_bayes_n2), at=15, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_A_weighted_bayes_n3), at=6, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_B_weighted_bayes_n3), at=11, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_weighted_bayes_n3), at=16, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_weighted_bayes_m1), at=17, xaxt="n", add=T)
+points(1,(mean(sim_results$VL_population)), pch=18, cex=2)
+lines(x=c(0,20), y=rep((mean(sim_results$VL_population)),2), lty=2)
+polygon(x=c(1.5,1.5,6.5,6.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
+polygon(x=c(11.5,11.5,17.5,17.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
+axis(1, at=1:17, labels=c("Population",rep(c("Observed","Weighted",expression(Bayesian^1),expression(Bayesian^2),expression(Bayesian^3)),3),expression(Bayesian^4)), tick=T, las=3, cex.axis=1)
+axis(3, at=c(4,9,14.5), labels=c("Clinic A\n(all plwh)","Clinic B\n(diagnosed)","Clinic C\n(in care)"), tick=F, cex.axis=0.8)
+
+#naive to weighted, log10 scale
 boxplot(log10(sim_results$VL_clinic_A), at=2, xlim=c(0.7, 17.3), ylim=range(1.8, 4.4), xaxt = "n", ylab="Mean Viral Load (log10 copies/mL)")
 boxplot(log10(sim_results$VL_clinic_B), at=7, xaxt="n", add=T)
 boxplot(log10(sim_results$VL_clinic_C), at=12, xaxt="n", add=T)
@@ -540,7 +607,26 @@ polygon(x=c(11.5,11.5,17.5,17.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border
 axis(1, at=1:17, labels=c("Population",rep(c("Observed","Weighted",expression(Bayesian^1),expression(Bayesian^2),expression(Bayesian^3)),3),expression(Bayesian^4)), tick=T, las=3, cex.axis=1)
 axis(3, at=c(4,9,14.5), labels=c("Clinic A\n(all plwh)","Clinic B\n(diagnosed)","Clinic C\n(in care)"), tick=F, cex.axis=0.8)
 
-#RMSE
+#RMSE, linear scale
+boxplot((sim_results$VL_clinic_A_rmse), at=1, xlim=c(0.7, 13.3), ylim=range(0, 20000), xaxt = "n", ylab="RMSE Viral Load (copies/mL)")
+boxplot((sim_results$VL_clinic_B_rmse), at=5, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_rmse), at=9, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_A_rmse_bayes_n1), at=2, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_B_rmse_bayes_n1), at=6, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_rmse_bayes_n1), at=10, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_A_rmse_bayes_n2), at=3, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_B_rmse_bayes_n2), at=7, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_rmse_bayes_n2), at=11, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_A_rmse_bayes_n3), at=4, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_B_rmse_bayes_n3), at=8, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_rmse_bayes_n3), at=12, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_rmse_bayes_m1), at=13, xaxt="n", add=T)
+axis(1, at=1:13, labels=c(rep(c("Weighted",expression(Bayesian^1),expression(Bayesian^2),expression(Bayesian^3)),3),expression(Bayesian^4)), tick=T, las=3, cex.axis=1)
+polygon(x=c(0.5,0.5,4.5,4.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
+polygon(x=c(8.5,8.5,13.5,13.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
+axis(3, at=c(2.5,6.5,11), labels=c("Clinic A\n(all plwh)","Clinic B\n(diagnosed)","Clinic C\n(in care)"), tick=F, cex.axis=0.8)
+
+#RMSE, log10 scale
 boxplot(log10(sim_results$VL_clinic_A_rmse), at=1, xlim=c(0.7, 13.3), ylim=range(1.8, 4.4), xaxt = "n", ylab="RMSE Viral Load (log10 copies/mL)")
 boxplot(log10(sim_results$VL_clinic_B_rmse), at=5, xaxt="n", add=T)
 boxplot(log10(sim_results$VL_clinic_C_rmse), at=9, xaxt="n", add=T)
@@ -559,7 +645,21 @@ polygon(x=c(0.5,0.5,4.5,4.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
 polygon(x=c(8.5,8.5,13.5,13.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
 axis(3, at=c(2.5,6.5,11), labels=c("Clinic A\n(all plwh)","Clinic B\n(diagnosed)","Clinic C\n(in care)"), tick=F, cex.axis=0.8)
 
-#weight misspecification
+#weight misspecification, linear scale
+boxplot((sim_results$VL_clinic_A_weighted), at=2, xlim=c(0.7, 7.3), ylim=range(0, 20000), xaxt = "n", ylab="Mean Viral Load (copies/mL)")
+boxplot((sim_results$VL_clinic_B_weighted), at=4, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_weighted), at=6, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_A_weighted_biased), at=3, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_B_weighted_biased), at=5, xaxt="n", add=T)
+boxplot((sim_results$VL_clinic_C_weighted_biased), at=7, xaxt="n", add=T)
+points(1,(mean(sim_results$VL_population)), pch=18, cex=2)
+lines(x=c(0,20), y=rep((mean(sim_results$VL_population)),2), lty=2)
+polygon(x=c(1.5,1.5,3.5,3.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
+polygon(x=c(5.5,5.5,7.5,7.5),y=c(0,60000,60000,0), col=grey(0.5,0.3), border=NA)
+axis(1, at=1:7, labels=c("Population",rep(c("Weighted","Biased"),3)), tick=T, las=3, cex.axis=1)
+axis(3, at=c(2.5,4.5,6.5), labels=c("Clinic A\n(all plwh)","Clinic B\n(diagnosed)","Clinic C\n(in care)"), tick=F, cex.axis=0.8)
+
+#weight misspecification, log10 scale
 boxplot(log10(sim_results$VL_clinic_A_weighted), at=2, xlim=c(0.7, 7.3), ylim=range(1.8, 4.4), xaxt = "n", ylab="Mean Viral Load (log10 copies/mL)")
 boxplot(log10(sim_results$VL_clinic_B_weighted), at=4, xaxt="n", add=T)
 boxplot(log10(sim_results$VL_clinic_C_weighted), at=6, xaxt="n", add=T)
@@ -592,42 +692,88 @@ axis(3, at=c(2.5,4.5,6.5), labels=c("Clinic A\n(all plwh)","Clinic B\n(diagnosed
 
 ### PAPER DESCRIPTIVES ###
 
+#note: these are all based on the individual simulation's GM (actual VL values not saved)
 median(log10(sim_results$VL_population))
-quantile(log10(sim_results$VL_population), probs=c(0.025,0.975))
+median((sim_results$VL_population))
+quantile((sim_results$VL_population), probs=c(0.025,0.975))
 
 median(log10(sim_results$VL_clinic_A))
-quantile(log10(sim_results$VL_clinic_A), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_A))
+quantile((sim_results$VL_clinic_A), probs=c(0.025,0.975))
 median(log10(sim_results$VL_clinic_B))
-quantile(log10(sim_results$VL_clinic_B), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_B))
+quantile((sim_results$VL_clinic_B), probs=c(0.025,0.975))
 median(log10(sim_results$VL_clinic_C))
-quantile(log10(sim_results$VL_clinic_C), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_C))
+quantile((sim_results$VL_clinic_C), probs=c(0.025,0.975))
 
-median(log10(sim_results$VL_clinic_A_weighted))
-quantile(log10(sim_results$VL_clinic_A_weighted), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_B_weighted))
-quantile(log10(sim_results$VL_clinic_B_weighted), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_C_weighted))
-quantile(log10(sim_results$VL_clinic_C_weighted), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_A_weighted))
+quantile((sim_results$VL_clinic_A_weighted), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_B_weighted))
+quantile((sim_results$VL_clinic_B_weighted), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_C_weighted))
+quantile((sim_results$VL_clinic_C_weighted), probs=c(0.025,0.975))
 
-median(log10(sim_results$VL_clinic_C_weighted_bayes_n1))
-quantile(log10(sim_results$VL_clinic_C_weighted_bayes_n1), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_C_weighted_bayes_n2))
-quantile(log10(sim_results$VL_clinic_C_weighted_bayes_n2), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_C_weighted_bayes_n3))
-quantile(log10(sim_results$VL_clinic_C_weighted_bayes_n3), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_C_weighted_bayes_m1))
-quantile(log10(sim_results$VL_clinic_C_weighted_bayes_m1), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_C_weighted_bayes_n1))
+quantile((sim_results$VL_clinic_C_weighted_bayes_n1), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_C_weighted_bayes_n2))
+quantile((sim_results$VL_clinic_C_weighted_bayes_n2), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_C_weighted_bayes_n3))
+quantile((sim_results$VL_clinic_C_weighted_bayes_n3), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_C_weighted_bayes_m1))
+quantile((sim_results$VL_clinic_C_weighted_bayes_m1), probs=c(0.025,0.975))
 
-median(log10(sim_results$VL_clinic_A_rmse))
-quantile(log10(sim_results$VL_clinic_A_rmse), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_B_rmse))
-quantile(log10(sim_results$VL_clinic_B_rmse), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_C_rmse))
-quantile(log10(sim_results$VL_clinic_C_rmse), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_A_rmse))
+quantile((sim_results$VL_clinic_A_rmse), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_B_rmse))
+quantile((sim_results$VL_clinic_B_rmse), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_C_rmse))
+quantile((sim_results$VL_clinic_C_rmse), probs=c(0.025,0.975))
 
-median(log10(sim_results$VL_clinic_A_rmse_bayes_n3))
-quantile(log10(sim_results$VL_clinic_A_rmse_bayes_n3), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_B_rmse_bayes_n3))
-quantile(log10(sim_results$VL_clinic_B_rmse_bayes_n3), probs=c(0.025,0.975))
-median(log10(sim_results$VL_clinic_C_rmse_bayes_n3))
-quantile(log10(sim_results$VL_clinic_C_rmse_bayes_n3), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_A_rmse_bayes_n3))
+quantile((sim_results$VL_clinic_A_rmse_bayes_n3), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_B_rmse_bayes_n3))
+quantile((sim_results$VL_clinic_B_rmse_bayes_n3), probs=c(0.025,0.975))
+median((sim_results$VL_clinic_C_rmse_bayes_n3))
+quantile((sim_results$VL_clinic_C_rmse_bayes_n3), probs=c(0.025,0.975))
+
+#table
+median(sim_pop$Population_age0); median(sim_pop$Population_age0)/n_plwh*100
+median(sim_pop$Population_age1); median(sim_pop$Population_age1)/n_plwh*100
+median(sim_pop$Population_age2); median(sim_pop$Population_age2)/n_plwh*100
+median(sim_pop$Population_age3); median(sim_pop$Population_age3)/n_plwh*100
+median(sim_pop$Population_genderF); median(sim_pop$Population_genderF)/n_plwh*100
+median(sim_pop$Population_genderM); median(sim_pop$Population_genderM)/n_plwh*100
+median(sim_pop$Population_raceB); median(sim_pop$Population_raceB)/n_plwh*100
+median(sim_pop$Population_raceW); median(sim_pop$Population_raceW)/n_plwh*100
+median(sim_pop$Population_raceH); median(sim_pop$Population_raceH)/n_plwh*100
+
+median(sim_pop$Clinic_A_age0); median(sim_pop$Clinic_A_age0)/n_clinic_a*100
+median(sim_pop$Clinic_A_age1); median(sim_pop$Clinic_A_age1)/n_clinic_a*100
+median(sim_pop$Clinic_A_age2); median(sim_pop$Clinic_A_age2)/n_clinic_a*100
+median(sim_pop$Clinic_A_age3); median(sim_pop$Clinic_A_age3)/n_clinic_a*100
+median(sim_pop$Clinic_A_genderF); median(sim_pop$Clinic_A_genderF)/n_clinic_a*100
+median(sim_pop$Clinic_A_genderM); median(sim_pop$Clinic_A_genderM)/n_clinic_a*100
+median(sim_pop$Clinic_A_raceB); median(sim_pop$Clinic_A_raceB)/n_clinic_a*100
+median(sim_pop$Clinic_A_raceW); median(sim_pop$Clinic_A_raceW)/n_clinic_a*100
+median(sim_pop$Clinic_A_raceH); median(sim_pop$Clinic_A_raceH)/n_clinic_a*100
+
+median(sim_pop$Clinic_B_age0); median(sim_pop$Clinic_B_age0)/n_clinic_b*100
+median(sim_pop$Clinic_B_age1); median(sim_pop$Clinic_B_age1)/n_clinic_b*100
+median(sim_pop$Clinic_B_age2); median(sim_pop$Clinic_B_age2)/n_clinic_b*100
+median(sim_pop$Clinic_B_age3); median(sim_pop$Clinic_B_age3)/n_clinic_b*100
+median(sim_pop$Clinic_B_genderF); median(sim_pop$Clinic_B_genderF)/n_clinic_b*100
+median(sim_pop$Clinic_B_genderM); median(sim_pop$Clinic_B_genderM)/n_clinic_b*100
+median(sim_pop$Clinic_B_raceB); median(sim_pop$Clinic_B_raceB)/n_clinic_b*100
+median(sim_pop$Clinic_B_raceW); median(sim_pop$Clinic_B_raceW)/n_clinic_b*100
+median(sim_pop$Clinic_B_raceH); median(sim_pop$Clinic_B_raceH)/n_clinic_b*100
+
+median(sim_pop$Clinic_C_age0); median(sim_pop$Clinic_C_age0)/n_clinic_c*100
+median(sim_pop$Clinic_C_age1); median(sim_pop$Clinic_C_age1)/n_clinic_c*100
+median(sim_pop$Clinic_C_age2); median(sim_pop$Clinic_C_age2)/n_clinic_c*100
+median(sim_pop$Clinic_C_age3); median(sim_pop$Clinic_C_age3)/n_clinic_c*100
+median(sim_pop$Clinic_C_genderF); median(sim_pop$Clinic_C_genderF)/n_clinic_c*100
+median(sim_pop$Clinic_C_genderM); median(sim_pop$Clinic_C_genderM)/n_clinic_c*100
+median(sim_pop$Clinic_C_raceB); median(sim_pop$Clinic_C_raceB)/n_clinic_c*100
+median(sim_pop$Clinic_C_raceW); median(sim_pop$Clinic_C_raceW)/n_clinic_c*100
+median(sim_pop$Clinic_C_raceH); median(sim_pop$Clinic_C_raceH)/n_clinic_c*100
